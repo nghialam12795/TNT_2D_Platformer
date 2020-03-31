@@ -4,12 +4,13 @@ AnimSprite::AnimSprite()
 {
 }
 
-AnimSprite::AnimSprite(AnimState anim_id, int start_row, int start_col, int num_frames, int max_sheet_row, int max_sheet_col)
+AnimSprite::AnimSprite(AnimState anim_id, int start_row, int start_col, int num_frames, float anim_speed, int max_sheet_row, int max_sheet_col)
 {
 	anim_id_ = anim_id;
 	start_row_ = start_row;
 	start_col_ = start_col;
 	num_frames_ = num_frames;
+	anim_speed_ = anim_speed;
 	max_sheet_row_ = max_sheet_row;
 	max_sheet_col_ = max_sheet_col;
 }
@@ -36,6 +37,11 @@ int AnimSprite::GetStartCol()
 int AnimSprite::GetNumFrames()
 {
 	return num_frames_;
+}
+
+float AnimSprite::GetAnimSpeed()
+{
+	return anim_speed_;
 }
 
 int AnimSprite::GetMaxSheetRow()
@@ -66,6 +72,11 @@ void AnimSprite::SetStartCol(int value)
 void AnimSprite::SetNumFrames(int value)
 {
 	num_frames_ = value;
+}
+
+void AnimSprite::SetAnimSpeed(float value)
+{
+	anim_speed_ = value;
 }
 
 void AnimSprite::SetMaxSheetRow(int value)

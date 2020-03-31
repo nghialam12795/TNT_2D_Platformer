@@ -13,6 +13,7 @@ public:
 	virtual void Resume();
 };
 
+// ENGINE STATES
 class PauseState :public GameState {
 public:
 	PauseState();
@@ -41,6 +42,35 @@ public:
 	void Exit();
 };
 
+// ANIM STATES
+class PlayerIdleState :public GameState {
+public:
+	PlayerIdleState();
+	void Enter();
+	void Update();
+	void Render();
+	void Exit();
+};
+
+class PlayerRunState :public GameState {
+public:
+	PlayerRunState();
+	void Enter();
+	void Update();
+	void Render();
+	void Exit();
+};
+
+class PlayerJumpState :public GameState {
+public:
+	PlayerJumpState();
+	void Enter();
+	void Update();
+	void Render();
+	void Exit();
+};
+
+// FSM
 class FSM {
 private:
 	std::vector<GameState*> states_;

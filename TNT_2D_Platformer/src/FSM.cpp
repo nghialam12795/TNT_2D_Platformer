@@ -192,3 +192,87 @@ std::vector<GameState*>& FSM::GetStates()
 	// TODO: insert return statement here
 	return states_;
 }
+
+PlayerIdleState::PlayerIdleState()
+{
+}
+
+void PlayerIdleState::Enter()
+{
+	TheGame::Instance()->GetPlayer().setCurrFrame(0);
+	TheGame::Instance()->GetPlayer().setAnimState(AnimState::IDLE);
+}
+
+void PlayerIdleState::Update()
+{
+	if (TheGame::Instance()->isKeyDown(SDL_SCANCODE_A) || TheGame::Instance()->isKeyDown(SDL_SCANCODE_LEFT)) {
+		if (TheGame::Instance()->GetPlayer().IsGrounded()) {
+			TheGame::Instance()->GetPlayerFSM().ChangeState(new PlayerRunState());
+		}
+	}
+	if (TheGame::Instance()->isKeyDown(SDL_SCANCODE_D) || TheGame::Instance()->isKeyDown(SDL_SCANCODE_RIGHT)) {
+		if (TheGame::Instance()->GetPlayer().IsGrounded()) {
+			TheGame::Instance()->GetPlayerFSM().ChangeState(new PlayerRunState());
+		}
+	}
+	if (TheGame::Instance()->isKeyDown(SDL_SCANCODE_SPACE) && TheGame::Instance()->IsJumpKeyPressable() && TheGame::Instance()->GetPlayer().IsGrounded()) {
+		TheGame::Instance()->SetJumpKeyPressable(false);
+		TheGame::Instance()->GetPlayer().setAccelerationY(-Globals::sJumpForce);
+		TheGame::Instance()->GetPlayer().SetGrounded(false);
+		TheGame::Instance()->GetPlayer().setAnimState(AnimState::JUMP);
+	}
+	TheGame::Instance()->GetPlayer().setAccelerationY(0);
+}
+
+void PlayerIdleState::Render()
+{
+	TheGame::Instance()->GetCamera().draw(TheGame::Instance()->GetPlayerPtr());
+}
+
+void PlayerIdleState::Exit()
+{
+}
+
+PlayerRunState::PlayerRunState()
+{
+}
+
+void PlayerRunState::Enter()
+{
+	TheGame::Instance()->GetPlayer().setCurrFrame(0);
+	TheGame::Instance()->GetPlayer().setAnimState(AnimState::RUN);
+}
+
+void PlayerRunState::Update()
+{
+	if (TheGame::Instance()->isKeyDown(SDL_SCANCODE_A) || TheGame::Instance()->isKeyDown(SDL_SCANCODE_LEFT)) {
+		TheGame::Instance()->GetPlayer().setMoveDirection(-1);
+	}
+	if (TheGame::Instance()->isKeyDown(SDL_SCANCODE_D) || TheGame::Instance()->isKeyDown(SDL_SCANCODE_RIGHT)) {
+		TheGame::Instance()->GetPlayer().setMoveDirection(1);
+	}
+	TheGame::Instance()->GetPlayer().MoveX();
+	
+	SDL_Event event;
+	if (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+		case SDL_KEYUP:
+			if (event.key.keysym.sym == SDLK_a || event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT) {
+				TheGame::Instance()->GetPlayer().setAccelerationX(0);
+				TheGame::Instance()->GetPlayerFSM().ChangeState(new PlayerIdleState());
+			}
+			break;
+		}
+	}
+}
+
+void PlayerRunState::Render()
+{
+	TheGame::Instance()->GetCamera().draw(TheGame::Instance()->GetPlayerPtr());
+}
+
+void PlayerRunState::Exit()
+{
+}

@@ -34,8 +34,17 @@ Player::Player()
 	GetAnimList()[IDLE]->SetStartRow(0);
 	GetAnimList()[IDLE]->SetStartCol(0);
 	GetAnimList()[IDLE]->SetNumFrames(4);
-	GetAnimList()[IDLE]->SetMaxSheetRow(16);
-	GetAnimList()[IDLE]->SetMaxSheetCol(7);
+	GetAnimList()[IDLE]->SetAnimSpeed(0.12f);
+	GetAnimList()[IDLE]->SetMaxSheetRow(16); //same for all states since there's only 1 sheet
+	GetAnimList()[IDLE]->SetMaxSheetCol(7); //same for all states since there's only 1 sheet
+
+	GetAnimList()[RUN]->SetAnimId(RUN);
+	GetAnimList()[RUN]->SetStartRow(1);
+	GetAnimList()[RUN]->SetStartCol(1);
+	GetAnimList()[RUN]->SetNumFrames(6);
+	GetAnimList()[RUN]->SetAnimSpeed(0.25f);
+	GetAnimList()[RUN]->SetMaxSheetRow(16); //same for all states since there's only 1 sheet
+	GetAnimList()[RUN]->SetMaxSheetCol(7); //same for all states since there's only 1 sheet
 }
 
 Player::~Player()
@@ -64,12 +73,15 @@ void Player::update()
 
 void Player::draw()
 {
-	switch (getAnimState()) {
-	case IDLE:
-		Animate();
+	Animate();
+	switch (getMoveDirection()) {
+	case 1:
 		TheTextureManager::Instance()->draw(TheGame::Instance()->getRenderer(), getTextureId(), getSrc(), getDst(), 0.0, 0, SDL_FLIP_NONE);
+		break;
+	case -1:
+		TheTextureManager::Instance()->draw(TheGame::Instance()->getRenderer(), getTextureId(), getSrc(), getDst(), 0.0, 0, SDL_FLIP_HORIZONTAL);
+		break;
 	}
-	
 }
 
 void Player::clean()

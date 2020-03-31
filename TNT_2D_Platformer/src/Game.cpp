@@ -17,6 +17,11 @@ glm::vec2 Game::getTargetPosition()
 	return glm::vec2(0,0);
 }
 
+Uint32 Game::getFrames() const
+{
+	return m_frames;
+}
+
 SDL_Renderer* Game::getRenderer()
 {
 	return m_pRenderer;
@@ -27,14 +32,24 @@ FSM& Game::GetFSM()
 	return *fsm_;
 }
 
-int Game::GetOffsetPositionX()
+FSM& Game::GetPlayerFSM()
 {
-	return offset_position_x_;
+	return *player_anim_fsm_;
 }
 
-int Game::GetOffsetPositionY()
+Player& Game::GetPlayer()
 {
-	return offset_position_y_;
+	return *player_ptr_;
+}
+
+Player* Game::GetPlayerPtr()
+{
+	return player_ptr_;
+}
+
+Camera& Game::GetCamera()
+{
+	return *camera_ptr_;
 }
 
 bool Game::IsJumpKeyPressable()
@@ -54,14 +69,9 @@ UI& Game::GetPauseScreen()
 	return *pause_screen_ptr_;
 }
 
-void Game::SetOffsetPositionX(int x_distance)
+void Game::setFrames(Uint32 frames)
 {
-	offset_position_x_ = x_distance;
-}
-
-void Game::SetOffsetPositionY(int y_distance)
-{
-	offset_position_y_ = y_distance;
+	m_frames = frames;
 }
 
 void Game::SetJumpKeyPressable(bool toggle)
@@ -85,6 +95,8 @@ void Game::createGameObjects()
 	player_ptr_ = new Player();
 	player_ptr_->SetWorldXAndHitBox(4 * level_ptr_->GetLevelTileWidth() + level_ptr_->GetLevelTileWidth() / 2 - player_ptr_->getDstW() / 2);
 	player_ptr_->SetWorldYAndHitBox(4 * level_ptr_->GetLevelTileHeight() + level_ptr_->GetLevelTileHeight() / 2 - player_ptr_->getDstH() / 2);
+	player_anim_fsm_ = new FSM();
+	player_anim_fsm_->ChangeState(new PlayerIdleState());
 
 	// CENTER CAM TO PLAYER
 	camera_ptr_ = new Camera();
@@ -102,27 +114,7 @@ void Game::CheckCollision()
 
 void Game::UpdateGameObjects()
 {
-	if (s_pInstance->isKeyDown(SDL_SCANCODE_A) || s_pInstance->isKeyDown(SDL_SCANCODE_LEFT)) {
-		player_ptr_->setMoveDirection(-1);
-		player_ptr_->MoveX();
-		player_ptr_->setAnimState(AnimState::RUN);
-	}
-	if (s_pInstance->isKeyDown(SDL_SCANCODE_D) || s_pInstance->isKeyDown(SDL_SCANCODE_RIGHT)) {
-		player_ptr_->setMoveDirection(1);
-		player_ptr_->MoveX();
-		player_ptr_->setAnimState(AnimState::RUN);
-	}
-	//if (s_pInstance->isKeyDown(SDL_SCANCODE_SPACE) && IsJumpKeyPressable() && player_ptr_->IsGrounded()) {
-	if (s_pInstance->isKeyDown(SDL_SCANCODE_SPACE) && IsJumpKeyPressable() && player_ptr_->IsGrounded()) {
-		SetJumpKeyPressable(false);
-		player_ptr_->setAccelerationY(-Globals::sJumpForce);
-		player_ptr_->SetGrounded(false);
-		player_ptr_->setAnimState(AnimState::JUMP);
-	}
-
-	player_ptr_->update();
-	player_ptr_->setAccelerationY(0);
-	//std::cout << "vel Y = " << player_ptr_->getVelocityY() << std::endl;
+	GetPlayerFSM().Update();
 
 	CheckCollision();
 
@@ -133,10 +125,18 @@ void Game::UpdateGameObjects()
 	level_ptr_->update();
 }
 
+void Game::ResetCurrAnimFrame()
+{
+	if (can_reset_anim_frame) {
+		player_ptr_->setCurrFrame(0);
+	}
+}
+
 void Game::RenderGameObjects()
 {
 	level_ptr_->draw();
-	camera_ptr_->draw(player_ptr_);
+	GetPlayerFSM().Render();
+	//camera_ptr_->draw(player_ptr_);
 }
 
 bool Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen)
@@ -238,9 +238,6 @@ void Game::handleEvents()
 			}
 			break;
 		case SDL_KEYUP:
-			if (event.key.keysym.sym == SDLK_a || event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT) {
-				player_ptr_->setAccelerationX(0);
-			}
 			if (event.key.keysym.sym == SDLK_SPACE) {
 				SetJumpKeyPressable(true);
 			}

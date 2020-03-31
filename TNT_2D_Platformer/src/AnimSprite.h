@@ -9,6 +9,7 @@ private:
 	int start_row_; 
 	int start_col_;
 	int num_frames_;
+	float anim_speed_;
 	int max_sheet_row_;
 	int max_sheet_col_;
 public:
@@ -17,6 +18,7 @@ public:
 		int start_row,
 		int start_col,
 		int num_frames,
+		float anim_speed,
 		int max_sheet_row,
 		int max_sheet_col);
 	~AnimSprite();
@@ -25,6 +27,7 @@ public:
 	int GetStartRow(); 
 	int GetStartCol();
 	int GetNumFrames();
+	float GetAnimSpeed();
 	int GetMaxSheetRow();
 	int GetMaxSheetCol();
 
@@ -32,6 +35,7 @@ public:
 	void SetStartRow(int value);
 	void SetStartCol(int value);
 	void SetNumFrames(int value);
+	void SetAnimSpeed(float value);
 	void SetMaxSheetRow(int value);
 	void SetMaxSheetCol(int value);
 };
